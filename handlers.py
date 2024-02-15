@@ -14,7 +14,8 @@ from categories import change_category
 from config import *
 from db import *
 from MESSAGES_TEXT import *
-
+from kb_builders import *
+from kb_builders import back_kb
 
 @dp.message(CommandStart())
 async def start_command(message: Message):
@@ -84,4 +85,36 @@ async def summary(message: Message):
         logger.debug(f"User: {user_id}, summarize: -{sum_consumption} +{sum_income}")
     except ValueError as err:
         await message.answer("Отстутствуют данные в одной из таблиц")
-        logger.info(err)
+        logger.error(err)
+
+@dp.message(Command("month"))
+async def month_list(message: Message):
+    await message.answer("Выберите месяц:", reply_markup=await month_list_kb())
+
+
+@dp.callback_query(lambda call: call.data=="December" or call.data=="January" or call.data=="February" or call.data=="March" or call.data=="April" or call.data=="May" or call.data=="June" or call.data=="July" or call.data=="August" or call.data=="September" or call.data=="October" or call.data=="November")
+async def summary_by_month(call: CallbackQuery):
+    try:
+        month = str(call.data)
+
+        summarize = await get_summary_by_month(user_id, month)
+        summarize = summarize.split(" ")
+        sum_income = int(summarize[0])
+        sum_consumption = int(summarize[1])
+
+        await call.message.edit_text(
+            f"Данные за {month}:\nВаши расходы: {sum_consumption} руб\nВаши доходы: {sum_income} руб", reply_markup=await back_kb()
+        )
+        logger.debug(f"User: {user_id}, month: {month}, summarize: -{sum_consumption} +{sum_income}")
+    except AttributeError as err:
+        await call.message.edit_text("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
+        logger.error(err)
+
+@dp.callback_query(F.data == "Back")
+async def to_main_menu(call: CallbackQuery):
+    # await call.message.answer(HELLO_MESSAGE)
+    await message.answer("Выберите месяц:", reply_markup=await month_list_kb())
+
+@dp.callback_query(F.data == "Back2")
+async def to_main_menu(call: CallbackQuery):
+    await message.answer("Выберите месяц:", reply_markup=await month_list_kb())

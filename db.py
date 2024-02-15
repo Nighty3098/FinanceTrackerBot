@@ -1,17 +1,19 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+
 
 from config import *
 
+month_name = date.today().strftime("%B")
 
 async def create_connection(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}.db")
+    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
     connection.close()
 
 
 async def create_table(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}.db")
+    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
     cursor.execute(
@@ -41,7 +43,7 @@ async def create_table(user_id):
 
 async def add_consumption(user_id, value, note):
     now = datetime.now()
-    connection = sqlite3.connect(f"finances_{user_id}.db")
+    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
     logger.debug(
@@ -57,7 +59,7 @@ async def add_consumption(user_id, value, note):
 
 async def add_income(user_id, value, note):
     now = datetime.now()
-    connection = sqlite3.connect(f"finances_{user_id}.db")
+    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
     logger.debug(
@@ -72,7 +74,7 @@ async def add_income(user_id, value, note):
 
 
 async def get_summary(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}.db")
+    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
     cursor.execute("SELECT SUM(value) FROM income")
@@ -87,3 +89,25 @@ async def get_summary(user_id):
     summarize = str(sum_income) + " " + str(sum_consumption)
 
     return summarize
+
+async def get_summary_by_month(user_id, month):
+    try:
+        connection = sqlite3.connect(f"finances_{user_id}_{month}.db")
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT SUM(value) FROM income")
+        sum_income = cursor.fetchone()[0]
+
+        cursor.execute("SELECT SUM(value) FROM consumption")
+        sum_consumption = cursor.fetchone()[0]
+
+        cursor.close()
+        connection.close()
+
+        summarize = str(sum_income) + " " + str(sum_consumption)
+
+        return summarize
+    except sqlite3.OperationalError as err:
+        logger.error(err)
+
+
