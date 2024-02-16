@@ -30,6 +30,13 @@ async def month_list_kb():
 
     return builder.as_markup()
 
+
+async def back_main():
+    builder = InlineKeyboardBuilder()
+    builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back2"))
+    builder.adjust(1)
+    return builder.as_markup()
+
 async def back_kb():
     builder = InlineKeyboardBuilder()
     builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back"))

@@ -42,7 +42,9 @@ async def create_table(user_id):
 
 
 async def add_consumption(user_id, value, note):
-    now = datetime.now()
+    today = datetime.now()
+    now = today.strftime("%d.%m.%Y")
+
     connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
@@ -58,7 +60,8 @@ async def add_consumption(user_id, value, note):
 
 
 async def add_income(user_id, value, note):
-    now = datetime.now()
+    today = datetime.now()
+    now = today.strftime("%d.%m.%Y")
     connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
     cursor = connection.cursor()
 
@@ -110,4 +113,26 @@ async def get_summary_by_month(user_id, month):
     except sqlite3.OperationalError as err:
         logger.error(err)
 
+
+async def today(user_id):
+    try:
+        today = datetime.now()
+        current_date = today.strftime("%d.%m.%Y")
+
+        connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM income WHERE date = ?", (current_date,))
+        income = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM consumption WHERE date = ?", (current_date,))
+        consumption = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        summarize = str(income) + " " + str(consumption)
+        return summarize
+    except sqlite3.OperationalError as err: 
+        logger.error(err)
 
