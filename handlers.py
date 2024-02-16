@@ -28,6 +28,7 @@ async def start_command(message: Message):
     logger.info(f"User {user_id} started the bot")
 
     if user_id in whitelist:
+        await message.answer_sticker(f'CAACAgIAAxkBAAEDiERlzyTAp3nkbu6T9nilXZcJDS87VQACEA4AAvWHUUj2ASQRaSSfRDQE')
         await message.answer(HELLO_MESSAGE)
         await create_connection(user_id)
 
@@ -110,11 +111,29 @@ async def summary_by_month(call: CallbackQuery):
         await call.message.edit_text("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
         logger.error(err)
 
+
+@dp.message(Command("today"))
+async def today_summarize(message: Message):
+    try:
+        summarize = await today(user_id)
+        summarize = summarize.split(" ")
+        income = int(summarize[0])
+        consumption = int(summarize[1])
+
+        await message.edit_text(f"Статистика за сегодня:\nВаши расходы: {consumption} руб\nВаши доходы: {income} руб", reply_markup=await back_kb())
+        logger.debug(f"User: {user_id}, summarize: -{consumption} +{income}")
+    except AttributeError as err:
+        await message.edit_text("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
+        logger.error(err) 
+
+
+
 @dp.callback_query(F.data == "Back")
 async def to_main_menu(call: CallbackQuery):
     # await call.message.answer(HELLO_MESSAGE)
-    await message.answer("Выберите месяц:", reply_markup=await month_list_kb())
+    await call.message.edit_text("Выберите месяц:", reply_markup=await month_list_kb())
 
 @dp.callback_query(F.data == "Back2")
 async def to_main_menu(call: CallbackQuery):
-    await message.answer("Выберите месяц:", reply_markup=await month_list_kb())
+    await call.message.answer(HELLO_MESSAGE)
+    # await call.message.edit_text("Выберите месяц:", reply_markup=await month_list_kb())

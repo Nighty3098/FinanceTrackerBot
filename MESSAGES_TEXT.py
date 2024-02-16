@@ -6,6 +6,7 @@ HELLO_MESSAGE = """
 /out %value% %note% - Добавить расход
 /in %value% %note% - Добавить доход
 /summary - Вывести итоговые данные за месяц
+/today - Статистика за сегодня
 """
 
 NO_ACCESS = """
