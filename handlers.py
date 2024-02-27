@@ -115,7 +115,7 @@ async def summary_by_month(call: CallbackQuery):
 @dp.message(Command("today"))
 async def today_summarize(message: Message):
     try:
-        summarize = await today(user_id)
+        summarize = str(await today(user_id))
         summarize = summarize.split(" ")
         income = int(summarize[0])
         consumption = int(summarize[1])
