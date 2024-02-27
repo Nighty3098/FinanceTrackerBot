@@ -131,8 +131,10 @@ async def today(user_id):
         cursor.close()
         connection.close()
 
-        summarize = str(income) + " " + str(consumption)
-        return summarize
+        result = " + " + income + " руб\n" + " - " + consumption + "руб"
+
+        return result
+
     except sqlite3.OperationalError as err:
         logger.error(err)
     except sqlite3.ProgrammingError as err: 

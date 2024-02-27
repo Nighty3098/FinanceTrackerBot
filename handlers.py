@@ -115,15 +115,14 @@ async def summary_by_month(call: CallbackQuery):
 @dp.message(Command("today"))
 async def today_summarize(message: Message):
     try:
-        summarize = str(await today(user_id))
-        summarize = summarize.split(" ")
-        income = int(summarize[0])
-        consumption = int(summarize[1])
+        result = await today(user_id)
 
-        await message.edit_text(f"Статистика за сегодня:\nВаши расходы: {consumption} руб\nВаши доходы: {income} руб", reply_markup=await back_kb())
-        logger.debug(f"User: {user_id}, summarize: -{consumption} +{income}")
+        await message.answer(f"Статистика за сегодня:\n{result}")
+        # await message.edit_text(f"Статистика за сегодня:\nВаши расходы: {consumption} руб\nВаши доходы: {income} руб", reply_markup=await back_kb())
+        # logger.debug(f"User: {user_id}, summarize: -{consumption} +{income}")
+        logger.debug(f"User: {user_id}, summarize: {result}")
     except AttributeError as err:
-        await message.edit_text("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
+        await message.answer("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
         logger.error(err) 
 
 
@@ -135,5 +134,4 @@ async def to_main_menu(call: CallbackQuery):
 
 @dp.callback_query(F.data == "Back2")
 async def to_main_menu(call: CallbackQuery):
-    await call.message.answer(HELLO_MESSAGE)
-    # await call.message.edit_text("Выберите месяц:", reply_markup=await month_list_kb())
+    await call.message.edit_text(HELLO_MESSAGE)
