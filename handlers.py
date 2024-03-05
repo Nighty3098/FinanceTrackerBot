@@ -9,13 +9,11 @@ from aiogram.utils.keyboard import *
 from aiogram.utils.markdown import *
 from requests.models import *
 
-from categories import *
-from categories import change_category
+from data.categories import *
 from config import *
 from db import *
 from MESSAGES_TEXT import *
-from kb_builders import *
-from kb_builders import back_kb
+from keyboards.kb_builders import *
 
 @dp.message(CommandStart())
 async def start_command(message: Message):
@@ -28,7 +26,7 @@ async def start_command(message: Message):
     logger.info(f"User {user_id} started the bot")
 
     if user_id in whitelist:
-        await message.answer_sticker(f'CAACAgIAAxkBAAEDiERlzyTAp3nkbu6T9nilXZcJDS87VQACEA4AAvWHUUj2ASQRaSSfRDQE')
+        # await message.answer_sticker(f'CAACAgIAAxkBAAEDiERlzyTAp3nkbu6T9nilXZcJDS87VQACEA4AAvWHUUj2ASQRaSSfRDQE')
         await message.answer(HELLO_MESSAGE)
         await create_connection(user_id)
 
@@ -126,6 +124,12 @@ async def today_summarize(message: Message):
         logger.error(err) 
 
 
+@dp.message(Command("year"))
+async def get_year_summary(message: Message):
+    result = await get_year_summary(user_id)
+    await message.answer(result, reply_markup=await back_kb())
+
+
 
 @dp.callback_query(F.data == "Back")
 async def to_main_menu(call: CallbackQuery):
@@ -135,3 +139,5 @@ async def to_main_menu(call: CallbackQuery):
 @dp.callback_query(F.data == "Back2")
 async def to_main_menu(call: CallbackQuery):
     await call.message.edit_text(HELLO_MESSAGE)
+
+
