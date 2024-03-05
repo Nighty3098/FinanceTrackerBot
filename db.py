@@ -4,16 +4,35 @@ from datetime import datetime, timedelta, date
 
 from config import *
 
+
+monthes = [
+    "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+]
 month_name = date.today().strftime("%B")
+now_year = str(datetime.now().strftime("%Y"))
+
+
+
 
 async def create_connection(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
     cursor = connection.cursor()
     connection.close()
 
 
 async def create_table(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
     cursor = connection.cursor()
 
     cursor.execute(
@@ -45,7 +64,7 @@ async def add_consumption(user_id, value, note):
     today = datetime.now()
     now = today.strftime("%d.%m.%Y")
 
-    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
     cursor = connection.cursor()
 
     logger.debug(
@@ -62,7 +81,7 @@ async def add_consumption(user_id, value, note):
 async def add_income(user_id, value, note):
     today = datetime.now()
     now = today.strftime("%d.%m.%Y")
-    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
     cursor = connection.cursor()
 
     logger.debug(
@@ -77,7 +96,7 @@ async def add_income(user_id, value, note):
 
 
 async def get_summary(user_id):
-    connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
     cursor = connection.cursor()
 
     cursor.execute("SELECT SUM(value) FROM income")
@@ -95,7 +114,7 @@ async def get_summary(user_id):
 
 async def get_summary_by_month(user_id, month):
     try:
-        connection = sqlite3.connect(f"finances_{user_id}_{month}.db")
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month}_{now_year}.db")
         cursor = connection.cursor()
 
         cursor.execute("SELECT SUM(value) FROM income")
@@ -119,19 +138,19 @@ async def today(user_id):
         today = datetime.now()
         current_date = str(today.strftime("%d.%m.%Y"))
 
-        connection = sqlite3.connect(f"finances_{user_id}_{month_name}.db")
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM income WHERE date = ?", (current_date))
+        cursor.execute("SELECT SUM(value) FROM income WHERE date = ?", (current_date))
         income = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM consumption WHERE date = ?", (current_date))
+        cursor.execute("SELECT SUM(value) FROM consumption WHERE date = ?", (current_date))
         consumption = cursor.fetchall()
 
         cursor.close()
         connection.close()
 
-        result = " + " + income + " руб\n" + " - " + consumption + "руб"
+        result = " + " + str(income) + " руб\n" + " - " + str(consumption) + "руб"
 
         return result
 
@@ -139,4 +158,39 @@ async def today(user_id):
         logger.error(err)
     except sqlite3.ProgrammingError as err: 
         logger.error(err)
+    except sqlite3.AttributeError as err:
+        logger.error(err)
 
+        return "Отсутствуют данные"
+
+
+async def get_year_summary(user_id):
+    message = " "
+
+    for i in range(1, 13):
+        try:
+            connection = sqlite3.connect(
+                f"data/finances_{user_id}_{monthes[i]}_{now_year}.db"
+            )
+            cursor = connection.cursor()
+
+            cursor.execute("SELECT SUM(value) FROM income")
+            total_income = cursor.fetchall()
+
+            cursor.execute("SELECT SUM(value) FROM consumption")
+            total_consumption = cursor.fetchall()
+
+            message += f"{monthes[i]}: +{total_income} руб\n -{total_consumption} руб\n"
+            
+            cursor.close()
+            connection.close()
+
+        except sqlite3.OperationalError as err:
+            logger.error(err)
+        except sqlite3.ProgrammingError as err:
+            logger.error(err)
+        except sqlite3.AttributeError as err:
+            logger.error(err)
+            message += f"{monthes[i]: Отсутствуют данные}\n"
+
+    return message
