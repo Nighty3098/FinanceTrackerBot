@@ -141,33 +141,32 @@ async def today(user_id):
         connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
         cursor = connection.cursor()
 
-        cursor.execute("SELECT SUM(value) FROM income WHERE date = ?", (current_date))
+        cursor.execute("SELECT SUM(value) FROM income WHERE date = ?", (current_date,))
         income = cursor.fetchall()
 
-        cursor.execute("SELECT SUM(value) FROM consumption WHERE date = ?", (current_date))
+        cursor.execute("SELECT SUM(value) FROM consumption WHERE date = ?", (current_date,))
         consumption = cursor.fetchall()
 
         cursor.close()
         connection.close()
 
-        result = " + " + str(income) + " руб\n" + " - " + str(consumption) + "руб"
-
-        return result
-
+        result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
     except sqlite3.OperationalError as err:
         logger.error(err)
-    except sqlite3.ProgrammingError as err: 
+    except sqlite3.ProgrammingError as err:
         logger.error(err)
-    except sqlite3.AttributeError as err:
+    except AttributeError as err:
         logger.error(err)
-
-        return "Отсутствуют данные"
-
+        result = f"{monthes[i]: Отсутствуют данные}\n"
+    return result
 
 async def get_year_summary(user_id):
     message = " "
 
-    for i in range(1, 13):
+    year_income = 0
+    year_consumption = 0
+
+    for i in range(12):
         try:
             connection = sqlite3.connect(
                 f"data/finances_{user_id}_{monthes[i]}_{now_year}.db"
@@ -180,8 +179,8 @@ async def get_year_summary(user_id):
             cursor.execute("SELECT SUM(value) FROM consumption")
             total_consumption = cursor.fetchall()
 
-            message += f"{monthes[i]}: +{total_income} руб\n -{total_consumption} руб\n"
-            
+            message += f"\n{monthes[i]}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
+
             cursor.close()
             connection.close()
 
@@ -189,8 +188,10 @@ async def get_year_summary(user_id):
             logger.error(err)
         except sqlite3.ProgrammingError as err:
             logger.error(err)
-        except sqlite3.AttributeError as err:
+        except AttributeError as err:
             logger.error(err)
             message += f"{monthes[i]: Отсутствуют данные}\n"
+
+    # message = f"Статистика за {now_year} год: \n + {year_income} руб.\n - {year_consumption} руб."
 
     return message
