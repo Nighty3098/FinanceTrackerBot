@@ -115,21 +115,18 @@ async def today_summarize(message: Message):
     try:
         result = await today(user_id)
 
-        await message.answer(f"Статистика за сегодня:\n{result}")
-        # await message.edit_text(f"Статистика за сегодня:\nВаши расходы: {consumption} руб\nВаши доходы: {income} руб", reply_markup=await back_kb())
-        # logger.debug(f"User: {user_id}, summarize: -{consumption} +{income}")
+        await message.answer(result, reply_markup=await back_main())
+
         logger.debug(f"User: {user_id}, summarize: {result}")
     except AttributeError as err:
-        await message.answer("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
+        await message.answer("Отстутствуют данные в одной из таблиц", reply_markup=await back_main())
         logger.error(err) 
 
 
 @dp.message(Command("year"))
-async def get_year_summary(message: Message):
+async def year_summary(message: Message):
     result = await get_year_summary(user_id)
     await message.answer(result, reply_markup=await back_kb())
-
-
 
 @dp.callback_query(F.data == "Back")
 async def to_main_menu(call: CallbackQuery):
