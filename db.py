@@ -2,29 +2,11 @@ import sqlite3
 from datetime import datetime, timedelta, date
 from types import resolve_bases
 
-
 from config import *
+from to_rus import *
 
-
-monthes = [
-    "December",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-]
 month_name = date.today().strftime("%B")
 now_year = str(datetime.now().strftime("%Y"))
-
-
-
 
 async def create_connection(user_id):
     connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
@@ -97,21 +79,30 @@ async def add_income(user_id, value, note):
 
 
 async def get_summary(user_id):
-    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
-    cursor = connection.cursor()
+    try:
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
+        cursor = connection.cursor()
 
-    cursor.execute("SELECT SUM(value) FROM income")
-    sum_income = cursor.fetchone()[0]
+        cursor.execute("SELECT SUM(value) FROM income")
+        sum_income = cursor.fetchone()[0]
 
-    cursor.execute("SELECT SUM(value) FROM consumption")
-    sum_consumption = cursor.fetchone()[0]
+        cursor.execute("SELECT SUM(value) FROM consumption")
+        sum_consumption = cursor.fetchone()[0]
 
-    cursor.close()
-    connection.close()
+        cursor.close()
+        connection.close()
 
-    summarize = str(sum_income) + " " + str(sum_consumption)
+        result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+    
+        return result
 
-    return summarize
+    except sqlite3.OperationalError as err:
+        logger.error(err)
+    except sqlite3.ProgrammingError as err:
+        logger.error(err)
+    except AttributeError as err:
+        logger.error(err)
+
 
 async def get_summary_by_month(user_id, month):
     try:
@@ -127,7 +118,7 @@ async def get_summary_by_month(user_id, month):
         cursor.close()
         connection.close()
 
-        result = f"Данные за {month_name}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+        result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
 
         return result
     except sqlite3.OperationalError as err:
@@ -184,7 +175,7 @@ async def get_year_summary(user_id):
             cursor.execute("SELECT SUM(value) FROM consumption")
             total_consumption = cursor.fetchall()
 
-            message += f"\n{monthes[i]}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
+            message += f"\n{str(await rus_month(monthes[i]))}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
 
             cursor.close()
             connection.close()
@@ -196,9 +187,6 @@ async def get_year_summary(user_id):
         except AttributeError as err:
             logger.error(err)
             message += f"{monthes[i]: Отсутствуют данные}\n"
-
-    # message = f"Статистика за {now_year} год: \n + {year_income} руб.\n - {year_consumption} руб."
-
     return message
 
 
@@ -220,7 +208,7 @@ async def get_summary_by_category(user_id, category, month):
         cursor.close()
         connection.close()
 
-        result = f"Статистика по категории: {category}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+        result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
 
         return result
     except sqlite3.OperationalError as err:
