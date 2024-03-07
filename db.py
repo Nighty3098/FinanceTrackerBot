@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, timedelta, date
+from types import resolve_bases
 
 
 from config import *
@@ -126,10 +127,14 @@ async def get_summary_by_month(user_id, month):
         cursor.close()
         connection.close()
 
-        summarize = str(sum_income) + " " + str(sum_consumption)
+        result = f"Данные за {month_name}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
 
-        return summarize
+        return result
     except sqlite3.OperationalError as err:
+        logger.error(err)
+    except sqlite3.ProgrammingError as err:
+        logger.error(err)
+    except AttributeError as err:
         logger.error(err)
 
 
@@ -195,3 +200,34 @@ async def get_year_summary(user_id):
     # message = f"Статистика за {now_year} год: \n + {year_income} руб.\n - {year_consumption} руб."
 
     return message
+
+
+async def get_summary_by_category(user_id, category, month):
+    try:
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month}_{now_year}.db")
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "SELECT SUM(value) FROM income WHERE note = ?", (category,)
+        )
+        income = cursor.fetchall()
+
+        cursor.execute(
+            "SELECT SUM(value) FROM consumption WHERE note = ?", (category,)
+        )
+        consumption = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        result = f"Статистика по категории: {category}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+
+        return result
+    except sqlite3.OperationalError as err:
+        logger.error(err)
+    except sqlite3.ProgrammingError as err:
+        logger.error(err)
+    except AttributeError as err:
+        logger.error(err)
+
+    

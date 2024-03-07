@@ -93,27 +93,29 @@ async def month_list(message: Message):
 
 @dp.callback_query(lambda call: call.data=="December" or call.data=="January" or call.data=="February" or call.data=="March" or call.data=="April" or call.data=="May" or call.data=="June" or call.data=="July" or call.data=="August" or call.data=="September" or call.data=="October" or call.data=="November")
 async def summary_by_month(call: CallbackQuery):
-    try:
-        month = str(call.data)
+    global month
+    month = str(call.data)
+    await call.message.edit_text("Выберите категорию трат:", reply_markup=await category_list_kb())
 
-        summarize = await get_summary_by_month(user_id, month)
-        summarize = summarize.split(" ")
-        sum_income = int(summarize[0])
-        sum_consumption = int(summarize[1])
 
-        await call.message.edit_text(
-            f"Данные за {month}:\nВаши расходы: {sum_consumption} руб\nВаши доходы: {sum_income} руб", reply_markup=await back_kb()
-        )
-        logger.debug(f"User: {user_id}, month: {month}, summarize: -{sum_consumption} +{sum_income}")
-    except AttributeError as err:
-        await call.message.edit_text("Отстутствуют данные в одной из таблиц", reply_markup=await back_kb())
-        logger.error(err)
 
+@dp.callback_query(lambda call: call.data=="Drive" or call.data=="All" or call.data=="Food" or call.data=="Subscriptions" or call.data=="Books" or call.data=="Other" or call.data=="Courses")
+async def categories(call: CallbackQuery):
+    category = str(call.data)
+
+    if category == "All":
+        result = str(await get_summary_by_month(user_id, month))
+        await call.message.edit_text(result, reply_markup=await to_categories())
+
+        logger.debug(f"{result}")
+    else:
+        result = str(await get_summary_by_category(user_id, category, month))
+        await call.message.edit_text(result, reply_markup=await to_categories())
 
 @dp.message(Command("today"))
 async def today_summarize(message: Message):
     try:
-        result = await today(user_id)
+        result = str(await today(user_id))
 
         await message.answer(result, reply_markup=await back_main())
 
@@ -137,4 +139,6 @@ async def to_main_menu(call: CallbackQuery):
 async def to_main_menu(call: CallbackQuery):
     await call.message.edit_text(HELLO_MESSAGE)
 
-
+@dp.callback_query(F.data == "Categories")
+async def category_list(call: CallbackQuery):
+    await call.message.edit_text("Выберите категорию трат:", reply_markup=await category_list_kb())
