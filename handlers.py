@@ -14,6 +14,7 @@ from config import *
 from db import *
 from MESSAGES_TEXT import *
 from keyboards.kb_builders import *
+from to_rus import rus_category
 
 @dp.message(CommandStart())
 async def start_command(message: Message):
@@ -44,7 +45,7 @@ async def income(message: Message):
             value = int(user_msg[1])
             category = await change_category(str(user_msg[2]))
             await add_income(user_id, value, category)
-            await message.answer(f"{value} рублей добавлено в {category}")
+            await message.answer(f"{value} рублей добавлено в {str(await rus_category(category))}")
             logger.debug(f"{user_id} add {value} _income_ to {category}")
         else:
             await message.answer("Неправильный формат ввода")
@@ -62,8 +63,8 @@ async def income(message: Message):
             value = int(user_msg[1])
             category = await change_category(str(user_msg[2]))
             await add_consumption(user_id, value, category)
-            await message.answer(f"{value} рублей добавлено в {category}")
-            logger.debug(f"{user_id} add {value} _consumption_ to {category}")
+            await message.answer(f"{value} рублей добавлено в {str(await rus_category(category))}")
+            logger.debug(f"{user_id} add {value} _consumption_ to {str(await rus_category(category))}")
         else:
             await message.answer("Неправильный формат ввода")
     else:
@@ -72,19 +73,11 @@ async def income(message: Message):
 
 @dp.message(Command("summary"))
 async def summary(message: Message):
-    try:
-        summarize = await get_summary(user_id)
-        summarize = summarize.split(" ")
-        sum_income = int(summarize[0])
-        sum_consumption = int(summarize[1])
+    result = await get_summary(user_id)
 
-        await message.answer(
-            f"Ваши расходы: {sum_consumption} руб\nВаши доходы: {sum_income} руб"
-        )
-        logger.debug(f"User: {user_id}, summarize: -{sum_consumption} +{sum_income}")
-    except ValueError as err:
-        await message.answer("Отстутствуют данные в одной из таблиц")
-        logger.error(err)
+    await message.answer(f"{str(result)}")
+    logger.debug(f"{str(result)}")
+
 
 @dp.message(Command("month"))
 async def month_list(message: Message):

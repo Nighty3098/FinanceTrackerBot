@@ -21,6 +21,21 @@ dp = Dispatcher()
 
 whitelist = ["1660218648"]
 
+monthes = [
+    "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+]
+
 logger = loguru.logger
 logger.level("DEBUG", color="<green>")
 logger.level("INFO", color="<cyan>")
@@ -36,14 +51,3 @@ logger.add(
     diagnose=True,
 )
 
-"""
-logger.add(
-    log_file,
-    level="DEBUG",
-    rotation="10000 MB",
-    retention="7 days",
-    format="{time: HH:mm:ss | YYYY-MM-DD} | {level} | {message} | ",
-    backtrace=True,
-    diagnose=True,
-)
-"""
