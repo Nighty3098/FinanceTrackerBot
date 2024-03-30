@@ -13,7 +13,6 @@ from config import *
 
 async def month_list_kb():
     builder = InlineKeyboardBuilder()
-    builder.add(types.InlineKeyboardButton(text="Декабрь", callback_data="December"))
     builder.add(types.InlineKeyboardButton(text="Январь", callback_data="January"))
     builder.add(types.InlineKeyboardButton(text="Февраль", callback_data="February"))
     builder.add(types.InlineKeyboardButton(text="Март", callback_data="March"))
@@ -25,6 +24,7 @@ async def month_list_kb():
     builder.add(types.InlineKeyboardButton(text="Сентябрь", callback_data="September"))
     builder.add(types.InlineKeyboardButton(text="Октябрь", callback_data="October"))
     builder.add(types.InlineKeyboardButton(text="Ноябрь", callback_data="November"))
+    builder.add(types.InlineKeyboardButton(text="Декабрь", callback_data="December"))
     builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back2"))
     builder.adjust(2)
 
@@ -58,6 +58,8 @@ async def category_list_kb():
     builder.add(types.InlineKeyboardButton(text="Книги", callback_data="Books"))
     builder.add(types.InlineKeyboardButton(text="Другое", callback_data="Other"))
     builder.add(types.InlineKeyboardButton(text="Обучение", callback_data="Courses"))
+    builder.add(types.InlineKeyboardButton(text="Налоги", callback_data="Taxes"))
+    builder.add(types.InlineKeyboardButton(text="ЖКХ", callback_data="jkh"))
     builder.add(types.InlineKeyboardButton(text="Общая статистика", callback_data="All"))
     builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back"))
     

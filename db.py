@@ -92,7 +92,7 @@ async def get_summary(user_id):
         cursor.close()
         connection.close()
 
-        result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+        result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}\n\n{str(sum_income-sum_consumption)} руб."
     
         return result
 
@@ -118,7 +118,7 @@ async def get_summary_by_month(user_id, month):
         cursor.close()
         connection.close()
 
-        result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+        result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}\n\n{str(sum_income-sum_consumption)} руб."
 
         return result
     except sqlite3.OperationalError as err:
@@ -146,7 +146,7 @@ async def today(user_id):
         cursor.close()
         connection.close()
 
-        result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+        result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб.\n\n{str(income[0][0]-consumption[0][0])} руб."
     except sqlite3.OperationalError as err:
         logger.error(err)
     except sqlite3.ProgrammingError as err:
@@ -155,6 +155,8 @@ async def today(user_id):
         logger.error(err)
         result = f"{monthes[i]: Отсутствуют данные}\n"
     return result
+
+
 
 async def get_year_summary(user_id):
     message = " "
@@ -208,7 +210,7 @@ async def get_summary_by_category(user_id, category, month):
         cursor.close()
         connection.close()
 
-        result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+        result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб.\n\n{str(income[0][0]-consumption[0][0])} руб."
 
         return result
     except sqlite3.OperationalError as err:
