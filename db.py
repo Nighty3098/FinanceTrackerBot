@@ -92,7 +92,11 @@ async def get_summary(user_id):
         cursor.close()
         connection.close()
 
-        result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+        if sum_consumption is not None and sum_income is not None:
+            result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}\n\n{str(int(sum_income) - int(sum_consumption))} руб."
+        else:
+            result = f"Ваша статистика за текущий месяц:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+            result = result.replace('None', '0')
     
         return result
 
@@ -118,7 +122,11 @@ async def get_summary_by_month(user_id, month):
         cursor.close()
         connection.close()
 
-        result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+        if sum_consumption is not None and sum_income is not None:
+            result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}\n\n{str(int(sum_income) - int(sum_consumption))} руб."
+        else:
+            result = f"Данные за {str(await rus_month(month_name))}:\n+{str(sum_income)}\n-{str(sum_consumption)}"
+            result = result.replace('None', '0')
 
         return result
     except sqlite3.OperationalError as err:
@@ -146,7 +154,12 @@ async def today(user_id):
         cursor.close()
         connection.close()
 
-        result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+        if consumption[0][0] is not None and income[0][0] is not None:
+            result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб.\n\n{str(int(income[0][0]) - int(consumption[0][0]))} руб."
+        else:
+            result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+            result = result.replace('None', '0')
+
     except sqlite3.OperationalError as err:
         logger.error(err)
     except sqlite3.ProgrammingError as err:
@@ -155,6 +168,8 @@ async def today(user_id):
         logger.error(err)
         result = f"{monthes[i]: Отсутствуют данные}\n"
     return result
+
+
 
 async def get_year_summary(user_id):
     message = " "
@@ -176,6 +191,7 @@ async def get_year_summary(user_id):
             total_consumption = cursor.fetchall()
 
             message += f"\n{str(await rus_month(monthes[i]))}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
+            message = message.replace('None', '0')
 
             cursor.close()
             connection.close()
@@ -208,7 +224,11 @@ async def get_summary_by_category(user_id, category, month):
         cursor.close()
         connection.close()
 
-        result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+        if consumption[0][0] is not None and income[0][0] is not None:
+            result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб.\n\n{str(int(income[0][0]) - int*(consumption[0][0]))} руб."
+        else:
+            result = f"{str(await rus_month(month))}\nСтатистика по категории: {str(await rus_category(category))}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
+            result = result.replace('None', '0')
 
         return result
     except sqlite3.OperationalError as err:
