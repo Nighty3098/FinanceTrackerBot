@@ -1,0 +1,5 @@
+FTB/
+keyboards/__pycache__
+data/__pycache__
+__pycache__
+data/*.db
