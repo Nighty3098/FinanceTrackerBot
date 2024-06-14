@@ -13,7 +13,7 @@ from loguru import *
 from db import *
 
 TOKEN = os.getenv("FTB_TOKEN")
-log_file = "~/logs/FTB.log"
+log_file = "logs/FTB.log"
 
 bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
