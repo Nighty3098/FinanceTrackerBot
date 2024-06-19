@@ -9,73 +9,84 @@ month_name = date.today().strftime("%B")
 now_year = str(datetime.now().strftime("%Y"))
 
 async def create_connection(user_id):
-    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
-    cursor = connection.cursor()
-    connection.close()
-
+    try:
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
+        cursor = connection.cursor()
+        connection.close()
+    except Exception as err:
+        logger.error(f"{err}")
 
 async def create_table(user_id):
-    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
-    cursor = connection.cursor()
+    try:
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
+        cursor = connection.cursor()
 
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS income  (
-        id INTEGER PRIMARY KEY,
-        date TEXT NOT NULL,
-        value INTEGER NOT NULL,
-        note TEXT
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS income  (
+            id INTEGER PRIMARY KEY,
+            date TEXT NOT NULL,
+            value INTEGER NOT NULL,
+            note TEXT
+            )
+            """
         )
-        """
-    )
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS consumption  (
-        id INTEGER PRIMARY KEY,
-        date TEXT NOT NULL,
-        value INTEGER NOT NULL,
-        note TEXT
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS consumption  (
+            id INTEGER PRIMARY KEY,
+            date TEXT NOT NULL,
+            value INTEGER NOT NULL,
+            note TEXT
+            )
+            """
         )
-        """
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+        connection.close()
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def add_consumption(user_id, value, note):
-    today = datetime.now()
-    now = today.strftime("%d.%m.%Y")
+    try:
+        today = datetime.now()
+        now = today.strftime("%d.%m.%Y")
 
-    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
-    cursor = connection.cursor()
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
+        cursor = connection.cursor()
 
-    logger.debug(
-        cursor.execute(
-            "INSERT INTO consumption (date, value, note) VALUES (?, ?, ?)",
-            (now, value, note)
+        logger.debug(
+            cursor.execute(
+                "INSERT INTO consumption (date, value, note) VALUES (?, ?, ?)",
+                (now, value, note)
+            )
         )
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+        connection.close()
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def add_income(user_id, value, note):
-    today = datetime.now()
-    now = today.strftime("%d.%m.%Y")
-    connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
-    cursor = connection.cursor()
+    try:
+        today = datetime.now()
+        now = today.strftime("%d.%m.%Y")
+        connection = sqlite3.connect(f"data/finances_{user_id}_{month_name}_{now_year}.db")
+        cursor = connection.cursor()
 
-    logger.debug(
-        cursor.execute(
-            "INSERT INTO income (date, value, note) VALUES (?, ?, ?)",
-            (now, value, note)
+        logger.debug(
+            cursor.execute(
+                "INSERT INTO income (date, value, note) VALUES (?, ?, ?)",
+                (now, value, note)
+            )
         )
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+        connection.close()
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def get_summary(user_id):
@@ -100,12 +111,8 @@ async def get_summary(user_id):
     
         return result
 
-    except sqlite3.OperationalError as err:
-        logger.error(err)
-    except sqlite3.ProgrammingError as err:
-        logger.error(err)
-    except AttributeError as err:
-        logger.error(err)
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def get_summary_by_month(user_id, month):
@@ -129,12 +136,8 @@ async def get_summary_by_month(user_id, month):
             result = result.replace('None', '0')
 
         return result
-    except sqlite3.OperationalError as err:
-        logger.error(err)
-    except sqlite3.ProgrammingError as err:
-        logger.error(err)
-    except AttributeError as err:
-        logger.error(err)
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def today(user_id):
@@ -160,10 +163,8 @@ async def today(user_id):
             result = f"Статистика за {current_date}\n+ {str(income[0][0])} руб.\n- {str(consumption[0][0])} руб."
             result = result.replace('None', '0')
 
-    except sqlite3.OperationalError as err:
-        logger.error(err)
-    except sqlite3.ProgrammingError as err:
-        logger.error(err)
+    except Exception as err:
+        logger.error(f"{err}")
     except AttributeError as err:
         logger.error(err)
         result = f"{monthes[i]: Отсутствуют данные}\n"
@@ -172,38 +173,39 @@ async def today(user_id):
 
 
 async def get_year_summary(user_id):
-    message = " "
+    try:
+        message = " "
 
-    year_income = 0
-    year_consumption = 0
+        year_income = 0
+        year_consumption = 0
 
-    for i in range(12):
-        try:
-            connection = sqlite3.connect(
-                f"data/finances_{user_id}_{monthes[i]}_{now_year}.db"
-            )
-            cursor = connection.cursor()
+        for i in range(12):
+            try:
+                connection = sqlite3.connect(
+                    f"data/finances_{user_id}_{monthes[i]}_{now_year}.db"
+                )
+                cursor = connection.cursor()
 
-            cursor.execute("SELECT SUM(value) FROM income")
-            total_income = cursor.fetchall()
+                cursor.execute("SELECT SUM(value) FROM income")
+                total_income = cursor.fetchall()
 
-            cursor.execute("SELECT SUM(value) FROM consumption")
-            total_consumption = cursor.fetchall()
+                cursor.execute("SELECT SUM(value) FROM consumption")
+                total_consumption = cursor.fetchall()
 
-            message += f"\n{str(await rus_month(monthes[i]))}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
-            message = message.replace('None', '0')
+                message += f"\n{str(await rus_month(monthes[i]))}:\n+ {str(total_income[0][0])} руб.\n- {str(total_consumption[0][0])} руб."
+                message = message.replace('None', '0')
 
-            cursor.close()
-            connection.close()
+                cursor.close()
+                connection.close()
 
-        except sqlite3.OperationalError as err:
-            logger.error(err)
-        except sqlite3.ProgrammingError as err:
-            logger.error(err)
-        except AttributeError as err:
-            logger.error(err)
-            message += f"{monthes[i]: Отсутствуют данные}\n"
-    return message
+            except Exception as err:
+                logger.error(f"{err}")
+            except AttributeError as err:
+                logger.error(err)
+                message += f"{monthes[i]: Отсутствуют данные}\n"
+        return message
+    except Exception as err:
+        logger.error(f"{err}")
 
 
 async def get_summary_by_category(user_id, category, month):
@@ -231,11 +233,5 @@ async def get_summary_by_category(user_id, category, month):
             result = result.replace('None', '0')
 
         return result
-    except sqlite3.OperationalError as err:
-        logger.error(err)
-    except sqlite3.ProgrammingError as err:
-        logger.error(err)
-    except AttributeError as err:
-        logger.error(err)
-
-    
+    except Exception as err:
+        logger.error(f"{err}")
