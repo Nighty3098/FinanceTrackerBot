@@ -1,5 +1,4 @@
 import asyncio
-import re
 
 import pretty_errors
 from aiogram import *
@@ -37,26 +36,46 @@ async def start_command(message: Message):
         await message.answer(NO_ACCESS)
 
 
-@dp.message()
-async def handle_message(message: Message):
-    pattern = r'^(?P<operation>[\+\-])\s*(?P<value>\d+)\s*(?P<category>.*)$'
-    match = re.search(pattern, message.text)
+@dp.message(Command("in"))
+async def income(message: Message):
+    if message.text.startswith("/in"):
+        user_msg = message.text
+        user_msg = user_msg.split(" ")
 
-    if match:
-        operation = match.group('operation')
-        value = int(match.group('value'))
-        category = await change_category(match.group('category'))
-
-        if operation == '+':
+        if len(user_msg) == 3:
+            value = int(user_msg[1])
+            category = await change_category(str(user_msg[2]))
             await add_income(user_id, value, category)
-            await message.answer(f"{value} рублей добавлено в {str(await rus_category(category))}")
+            await message.answer(
+                f"{value} рублей добавлено в {str(await rus_category(category))}"
+            )
             logger.debug(f"{user_id} add {value} _income_ to {category}")
-        elif operation == '-':
-            await add_consumption(user_id, value, category)
-            await message.answer(f"{value} рублей добавлено в {str(await rus_category(category))}")
-            logger.debug(f"{user_id} add {value} _consumption_ to {category}")
+        else:
+            await message.answer("Неправильный формат ввода")
     else:
-        await message.answer("Неправильный формат ввода")
+        pass
+
+
+@dp.message(Command("out"))
+async def consumption(message: Message):
+    if message.text.startswith("/out"):
+        user_msg = message.text
+        user_msg = user_msg.split(" ")
+
+        if len(user_msg) == 3:
+            value = int(user_msg[1])
+            category = await change_category(str(user_msg[2]))
+            await add_consumption(user_id, value, category)
+            await message.answer(
+                f"{value} рублей добавлено в {str(await rus_category(category))}"
+            )
+            logger.debug(
+                f"{user_id} add {value} _consumption_ to {str(await rus_category(category))}"
+            )
+        else:
+            await message.answer("Неправильный формат ввода")
+    else:
+        pass
 
 
 @dp.message(Command("summary"))
