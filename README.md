@@ -27,12 +27,12 @@
 
 <h2 align="center">Команды</h2>
 
- - ```/month``` -  вывести все расходы и доходы за определённый месяц
- - ```/year``` - вывести все расходы и доходы за год
- - ```/out``` - Добавить расход
- - ```/in``` - Добавить доход
- - ```/summary``` - Вывести итоговые данные за месяц
- - ```/today``` - Статистика за сегодня
+ - ```/month``` -  display all expenses and revenues for a particular month
+ - ```/year``` - output all expenses and revenues for the year
+ - ```/out %value% %category%``` - Add consumption
+ - ```/in %value% %category%``` - Add income
+ - ```/summary``` - Print month totals
+ - ```/today``` - Today's statistics
 
 
 <h1 align="center">Installing</h1>
@@ -46,6 +46,6 @@ source FTB/bin/activate
 
 pip3 install -r requirements.txt
 
-FTB_TOKEN=%токен_вашего_бота% python3 main.py
+FTB_TOKEN=%Bot token% python3 main.py
 ```
 
