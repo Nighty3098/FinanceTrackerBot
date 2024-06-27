@@ -36,7 +36,6 @@ async def start_command(message: Message):
     logger.info((requests.get(url).json()))
 
     if user_id in whitelist:
-        # await message.answer_sticker(f'CAACAgIAAxkBAAEDiERlzyTAp3nkbu6T9nilXZcJDS87VQACEA4AAvWHUUj2ASQRaSSfRDQE')
         await message.answer(HELLO_MESSAGE)
         await create_connection(user_id)
 
