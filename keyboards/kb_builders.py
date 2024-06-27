@@ -32,16 +32,22 @@ async def month_list_kb():
 
 
 async def back_main():
-    builder = InlineKeyboardBuilder()
-    builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back2"))
-    builder.adjust(1)
-    return builder.as_markup()
+    try:
+        builder = InlineKeyboardBuilder()
+        builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back2"))
+        builder.adjust(1)
+        return builder.as_markup()
+    except Exception as err:
+        logger.error(f"{err}")
 
 async def back_kb():
-    builder = InlineKeyboardBuilder()
-    builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back"))
-    builder.adjust(1)
-    return builder.as_markup()
+    try:
+        builder = InlineKeyboardBuilder()
+        builder.add(types.InlineKeyboardButton(text="<<<", callback_data="Back"))
+        builder.adjust(1)
+        return builder.as_markup()
+    except Exception as err:
+        logger.error(f"{err}")
 
 async def to_categories():
     builder = InlineKeyboardBuilder()

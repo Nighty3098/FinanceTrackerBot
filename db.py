@@ -165,9 +165,7 @@ async def today(user_id):
 
     except Exception as err:
         logger.error(f"{err}")
-    except AttributeError as err:
-        logger.error(err)
-        result = f"{monthes[i]: Отсутствуют данные}\n"
+        result = f"{monthes[i]} Ошибка\n"
     return result
 
 
@@ -198,11 +196,6 @@ async def get_year_summary(user_id):
                 cursor.close()
                 connection.close()
 
-            except Exception as err:
-                logger.error(f"{err}")
-            except AttributeError as err:
-                logger.error(err)
-                message += f"{monthes[i]: Отсутствуют данные}\n"
         return message
     except Exception as err:
         logger.error(f"{err}")
